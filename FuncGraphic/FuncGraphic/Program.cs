@@ -15,6 +15,8 @@ namespace FuncGraphic
 
         private delegate double FuncToShow(double x);
 
+        private static FuncToShow myF = Cos1DivX;
+
         private static double Cos1DivX(double x)
         {
             return Math.Cos(1 / x);
@@ -30,20 +32,13 @@ namespace FuncGraphic
             return x*x*x*x*x;
         }
 
-        private static Bitmap CreateImage(FuncToShow F, double xFrom, double xTo)
+        private static Tuple<double, double> GetMinMaxValues(FuncToShow F, double xFrom, double xTo)
         {
-            Bitmap image = new Bitmap(WindowSize, WindowSize);
-            Graphics g = Graphics.FromImage(image);
-            Pen pen = new Pen(Color.Yellow);
-            g.FillRectangle(Brushes.Blue, 0, 0, image.Width, image.Height);
-
-
-            Point nextPoint, oldPoint;
-            int screenX, screenY;
-            double x, y;
             double maxY = F(XFrom);
             double minY = F(XFrom);
-            for (screenX = 0; screenX < WindowSize; ++screenX )
+            int screenX;
+            double x, y;
+            for (screenX = 0; screenX < WindowSize; ++screenX)
             {
                 x = (XFrom + screenX * (xTo - XFrom) / WindowSize);
                 y = F(x);
@@ -52,6 +47,22 @@ namespace FuncGraphic
                 if (y > maxY)
                     maxY = y;
             }
+            return Tuple.Create(minY, maxY);
+        }
+
+        private static void CreateImage(Bitmap image, FuncToShow F, double xFrom, double xTo)
+        {
+            Pen pen = new Pen(Color.Yellow, 1);
+            Graphics g = Graphics.FromImage(image);
+
+            Tuple<double, double> minMax = GetMinMaxValues(F, XFrom, XTo);
+            double minY = minMax.Item1;
+            double maxY = minMax.Item2;
+
+            Point nextPoint, oldPoint;
+            int screenX, screenY;
+            double x, y;
+
             screenY = (int)((F(XFrom) - minY) * WindowSize / (maxY - minY));
             oldPoint = new Point(0, screenY);
 
@@ -66,7 +77,6 @@ namespace FuncGraphic
                 g.DrawLine(pen, oldPoint, nextPoint);
                 oldPoint = nextPoint;
             }
-            return image;
         }
 
         private static void ShowImageInWindow(Bitmap image)
@@ -81,7 +91,13 @@ namespace FuncGraphic
 
         static void Main(string[] args)
         {
-            var image = CreateImage(XCube, XFrom, XTo);
+            Bitmap image = new Bitmap(WindowSize, WindowSize);
+            Graphics g = Graphics.FromImage(image);
+            g.FillRectangle(Brushes.Blue, 0, 0, image.Width, image.Height);
+
+            Tuple<double, double> minMax = GetMinMaxValues(myF, XFrom, XTo);
+
+            CreateImage(image, myF, XFrom, XTo);
 
             // image.Save("img.png", ImageFormat.Png);
 
