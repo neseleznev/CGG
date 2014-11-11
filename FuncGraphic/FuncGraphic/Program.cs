@@ -15,7 +15,7 @@ namespace FuncGraphic
 
         private delegate double FuncToShow(double x);
 
-        private static FuncToShow myF = Cos1DivX;
+        private static FuncToShow myF = (x) => x*x;
 
         private static double Cos1DivX(double x)
         {
@@ -52,12 +52,26 @@ namespace FuncGraphic
 
         private static void CreateImage(Bitmap image, FuncToShow F, double xFrom, double xTo)
         {
-            Pen pen = new Pen(Color.Yellow, 1);
+            Pen pen = new Pen(Color.Blue, 1);
+            Pen axisPen = new Pen(Color.Black, 2);
             Graphics g = Graphics.FromImage(image);
 
             Tuple<double, double> minMax = GetMinMaxValues(F, XFrom, XTo);
             double minY = minMax.Item1;
             double maxY = minMax.Item2;
+
+            if (XFrom < 0 && XTo > 0)
+            {
+                int screenX0 = (int)(-XFrom * WindowSize / (xTo - XFrom));
+                g.DrawLine(axisPen, screenX0, WindowSize, screenX0, 0);
+            }
+
+            if (minY < 0 && maxY > 0)
+            {
+                int screenY0 = (int)(-minY * WindowSize / (maxY - minY));
+                g.DrawLine(axisPen, 0, screenY0, WindowSize, screenY0);
+            }
+                
 
             Point nextPoint, oldPoint;
             int screenX, screenY;
@@ -93,7 +107,7 @@ namespace FuncGraphic
         {
             Bitmap image = new Bitmap(WindowSize, WindowSize);
             Graphics g = Graphics.FromImage(image);
-            g.FillRectangle(Brushes.Blue, 0, 0, image.Width, image.Height);
+            g.FillRectangle(Brushes.Azure, 0, 0, image.Width, image.Height);
 
             Tuple<double, double> minMax = GetMinMaxValues(myF, XFrom, XTo);
 
