@@ -86,7 +86,7 @@ namespace FuncGraphic
                 y = F(x);
                 if (double.IsNaN(y))
                     continue;
-                screenY = (int)((y - minY) * WindowSize / (maxY - minY));
+                screenY = (int)((maxY - y) * WindowSize / (maxY - minY));
                 nextPoint = new Point(screenX, screenY);
                 g.DrawLine(pen, oldPoint, nextPoint);
                 oldPoint = nextPoint;
