@@ -11,14 +11,14 @@ namespace FuncGraphic
 	{
 		const int WindowSize = 500;
 		const int XFrom = -1;
-		const int XTo = 1;
+		const int XTo = 4;
 		private static Pen pen = new Pen(Color.Blue, 1);
 		private static Pen axisPen = new Pen(Color.Black, 2);
 		private static Graphics g;
 
 		private delegate double FuncToShow(double x);
 
-		private static FuncToShow myF = Cos1DivX;
+		private static FuncToShow myF = x => x*Math.Cos(x*x);
 
 		private static double Cos1DivX(double x)
 		{
@@ -63,7 +63,7 @@ namespace FuncGraphic
 
 			if (minY < 0 && maxY > 0)
 			{
-				int screenY0 = (int)(-minY * WindowSize / (maxY - minY));
+				int screenY0 = (int)(maxY * WindowSize / (maxY - minY));
 				g.DrawLine(axisPen, 0, screenY0, WindowSize, screenY0);
 			}
 		}
@@ -81,7 +81,7 @@ namespace FuncGraphic
 			int screenX, screenY;
 			double x, y;
 
-			screenY = (int)((F(XFrom) - minY) * WindowSize / (maxY - minY));
+			screenY = (int)((maxY - F(XFrom)) * WindowSize / (maxY - minY));
 			oldPoint = new Point(0, screenY);
 
 			for (screenX = 0; screenX < WindowSize; screenX++)
