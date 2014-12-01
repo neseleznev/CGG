@@ -9,8 +9,8 @@ namespace FuncGraphic
 		const int WindowSize = 500;
 		private static Pen pen = new Pen(Color.Blue, 1);
 		private static Graphics g;
-		private static int xCoef = 250;
-		private static int yCoef = 110;
+		private static int xCoef = 25;
+		private static int yCoef = 15;
 		private static int middle = WindowSize / 2;
 
 		private static void DrawPixel(Bitmap image, int screenX, int screenY)
@@ -21,32 +21,37 @@ namespace FuncGraphic
 			image.SetPixel(middle - screenX, WindowSize - middle + screenY, Color.Blue);
 		}
 
+		private static void DrawPixel1(Bitmap image, int screenX, int screenY)
+		{
+			image.SetPixel(screenX, screenY, Color.Blue);
+		}
+
 		private static void CreateImage(Bitmap image)
 		{
 			
-			double pixelSize = Math.Max(xCoef, yCoef) / (double)middle;
+			double pixelSize = 1;
 			int screenX, screenY;
 			int graphicSizeX, graphicSizeY;
 
 			if(xCoef > yCoef)
 			{
 				graphicSizeX = middle;
-				graphicSizeY = middle - (int)((xCoef - yCoef) / pixelSize);
+				graphicSizeY = ((yCoef*graphicSizeX)/xCoef);
 			}
 			else
 			{
-				graphicSizeX = middle - (int)((yCoef - xCoef) / pixelSize);
 				graphicSizeY = middle;
+				graphicSizeX = (xCoef*graphicSizeY)/yCoef;
 			}
 
 
 			screenY = graphicSizeY;
 			DrawPixel(image, 0, graphicSizeY);
-			for (screenX = 0; screenX < graphicSizeX;)
+			for (screenX = 0; screenX <= graphicSizeX && screenY >= 0;)
 			{
-				int deltaX = screenX;
-				double realX = (deltaX + 1)*pixelSize;
-				double realY = yCoef*Math.Sin(Math.Acos(realX/xCoef));
+				double realX = (screenX + 1) * pixelSize;
+				double t = Math.Acos(realX / graphicSizeX);
+				double realY = graphicSizeY * Math.Sin(Math.Acos(realX / graphicSizeX)); ;
 				double delta = ((screenX + 1) * (screenX + 1) + (screenY - 1) * (screenY - 1)) - (realX * realX + realY * realY);
 				if(delta < 0)//point inside
 				{
