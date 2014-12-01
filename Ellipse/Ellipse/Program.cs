@@ -10,24 +10,25 @@ namespace FuncGraphic
 		private static Pen pen = new Pen(Color.Blue, 1);
 		private static Graphics g;
 		private static int xCoef = 250;
-		private static int yCoef = 100;
+		private static int yCoef = 110;
 		private static int middle = WindowSize / 2;
 
 		private static void DrawPixel(Bitmap image, int screenX, int screenY)
 		{
 			image.SetPixel(middle + screenX, middle - screenY, Color.Blue);
+			image.SetPixel(middle + screenX, WindowSize - middle + screenY, Color.Blue);
+			image.SetPixel(middle - screenX, middle - screenY, Color.Blue);
+			image.SetPixel(middle - screenX, WindowSize - middle + screenY, Color.Blue);
 		}
 
 		private static void CreateImage(Bitmap image)
 		{
-
-			Point nextPoint, oldPoint;
 			
 			double pixelSize = Math.Max(xCoef, yCoef) / (double)middle;
 			int screenX, screenY;
 			int graphicSizeX, graphicSizeY;
 
-			if(Math.Max(xCoef, yCoef) == xCoef)
+			if(xCoef > yCoef)
 			{
 				graphicSizeX = middle;
 				graphicSizeY = middle - (int)((xCoef - yCoef) / pixelSize);
@@ -40,6 +41,7 @@ namespace FuncGraphic
 
 
 			screenY = graphicSizeY;
+			DrawPixel(image, 0, graphicSizeY);
 			for (screenX = 0; screenX < graphicSizeX;)
 			{
 				int deltaX = screenX;
@@ -74,23 +76,7 @@ namespace FuncGraphic
 						DrawPixel(image, screenX, screenY);
 					}
 				}
-
 			}
-			//screenY = (int)((F(XFrom) - minY) * WindowSize / (maxY - minY));
-			//oldPoint = new Point(0, screenY);
-
-			//for (screenX = 0; screenX < WindowSize; screenX++)
-			//{
-			//	x = (XFrom + screenX * (xTo - XFrom) / WindowSize);
-			//	y = F(x);
-			//	if (double.IsNaN(y))
-			//		continue;
-			//	screenY = (int)((maxY - y) * WindowSize / (maxY - minY));
-			//	nextPoint = new Point(screenX, screenY);
-			//	g.DrawLine(pen, oldPoint, nextPoint);
-			//	//image.SetPixel(nextPoint.X, nextPoint.Y, Color.Blue);
-			//	oldPoint = nextPoint;
-			//}
 		}
 
 		private static void ShowImageInWindow(Bitmap image)
