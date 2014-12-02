@@ -9,9 +9,35 @@ namespace FuncGraphic
 		const int WindowSize = 500;
 		private static Pen pen = new Pen(Color.Blue, 1);
 		private static Graphics g;
-		private static int xCoef = 25;
-		private static int yCoef = 15;
+		private static int xShift = 0;
+		private static int yShift = 0;
+		private static int xCoef = 200;
+		private static int yCoef = 100;
 		private static int middle = WindowSize / 2;
+
+		private static bool InDiapason(int val, int min, int max)
+		{
+			return (val < max && val > min);
+		}
+
+		private static void DrawPixelSsshifted(Bitmap image, int screenX, int screenY)
+		{
+			if (InDiapason(xShift + middle + screenX, 0, WindowSize) &&
+				InDiapason(yShift + middle - screenY, 0, WindowSize))
+				image.SetPixel(xShift + middle + screenX, yShift + middle - screenY, Color.Blue);
+
+			if (InDiapason(xShift + middle + screenX, 0, WindowSize) &&
+				InDiapason(yShift + WindowSize - middle + screenY, 0, WindowSize))
+				image.SetPixel(xShift + middle + screenX, yShift + WindowSize - middle + screenY, Color.Blue);
+
+			if (InDiapason(xShift + middle - screenX, 0, WindowSize) &&
+				InDiapason(yShift + middle - screenY, 0, WindowSize))
+				image.SetPixel(xShift + middle - screenX, yShift + middle - screenY, Color.Blue);
+
+			if (InDiapason(xShift + middle - screenX, 0, WindowSize) &&
+				InDiapason(yShift + WindowSize - middle + screenY, 0, WindowSize))
+				image.SetPixel(xShift + middle - screenX, yShift + WindowSize - middle + screenY, Color.Blue);
+		}
 
 		private static void DrawPixel(Bitmap image, int screenX, int screenY)
 		{
@@ -28,57 +54,58 @@ namespace FuncGraphic
 
 		private static void CreateImage(Bitmap image)
 		{
-			
-			double pixelSize = 1;
 			int screenX, screenY;
-			int graphicSizeX, graphicSizeY;
+			//int graphicSizeX = 0;
+			//int graphicSizeY = 0;
 
-			if(xCoef > yCoef)
-			{
-				graphicSizeX = middle;
-				graphicSizeY = ((yCoef*graphicSizeX)/xCoef);
-			}
-			else
-			{
-				graphicSizeY = middle;
-				graphicSizeX = (xCoef*graphicSizeY)/yCoef;
-			}
+			//if (xCoef > yCoef)
+			//{
+			//    graphicSizeX = middle;
+			//    graphicSizeY = ((yCoef * graphicSizeX) / xCoef);
+			//}
+			//else
+			//{
+			//    graphicSizeY = middle;
+			//    graphicSizeX = (xCoef * graphicSizeY) / yCoef;
+			//}
+			//xShift = (graphicSizeX * xShift) / xCoef;
+			//yShift = (graphicSizeY * yShift) / yCoef;
 
-
-			screenY = graphicSizeY;
-			DrawPixel(image, 0, graphicSizeY);
-			for (screenX = 0; screenX <= graphicSizeX && screenY >= 0;)
+			screenY = yCoef;
+			DrawPixelSsshifted(image, 0, yCoef);
+			for (screenX = 0; screenX <= xCoef && screenY >= 0; )
 			{
-				double realX = (screenX + 1) * pixelSize;
-				double t = Math.Acos(realX / graphicSizeX);
-				double realY = graphicSizeY * Math.Sin(Math.Acos(realX / graphicSizeX)); ;
-				double delta = ((screenX + 1) * (screenX + 1) + (screenY - 1) * (screenY - 1)) - (realX * realX + realY * realY);
-				if(delta < 0)//point inside
+				double realX = screenX + 1;
+				double t = Math.Acos(realX / middle);
+				double realY = yCoef * Math.Sin(Math.Acos(realX / xCoef));
+				double radiusSqr = (realX * realX + realY * realY);
+				double delta = ((screenX + 1) * (screenX + 1) + (screenY - 1) * (screenY - 1)) - radiusSqr;
+				if (delta < 0)//point inside
 				{
-					if(2*delta + 2* screenY -1 > 0)
+					if (2 * delta + 2 * screenY - 1 > 0)
 					{
-						screenY--;
+						//screenY--;
 						screenX++;
-						DrawPixel(image, screenX, screenY);
+						DrawPixelSsshifted(image, screenX, screenY);
 					}
 					else
 					{
 						screenX++;
-						DrawPixel(image, screenX, screenY);
+						DrawPixelSsshifted(image, screenX, screenY);
 					}
 				}
 				else//outside
 				{
-					if(2*delta - 2*screenX - 1 < 0)
+					if (2 * delta - 2 * screenX - 1 < 0)
 					{
-						screenX++;
+						//screenX++;
 						screenY--;
-						DrawPixel(image, screenX, screenY);
+						DrawPixelSsshifted(image, screenX, screenY);
 					}
 					else
 					{
 						screenY--;
-						DrawPixel(image, screenX, screenY);
+						DrawPixelSsshifted(image, screenX, screenY);
 					}
 				}
 			}
