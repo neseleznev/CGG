@@ -1,19 +1,18 @@
 ﻿using System;
-using System.Windows.Forms;
 using System.Drawing;
+using System.Windows.Forms;
 
-namespace FuncGraphic
+namespace Ellipse
 {
 	class Program
 	{
 		const int WindowSize = 500;
-		private static Pen pen = new Pen(Color.Blue, 1);
-		private static Graphics g;
-		private static int xShift = 0;
-		private static int yShift = 0;
-		private static int xCoef = 200;
-		private static int yCoef = 100;
-		private static int middle = WindowSize / 2;
+		private static Graphics Graphic;
+		private const int XShift = 0;
+		private const int YShift = 0;
+		private const int XCoef = 200;
+		private const int YCoef = 100;
+		private const int Middle = WindowSize/2;
 
 		private static bool InDiapason(int val, int min, int max)
 		{
@@ -22,29 +21,29 @@ namespace FuncGraphic
 
 		private static void DrawPixelSsshifted(Bitmap image, int screenX, int screenY)
 		{
-			if (InDiapason(xShift + middle + screenX, 0, WindowSize) &&
-				InDiapason(yShift + middle - screenY, 0, WindowSize))
-				image.SetPixel(xShift + middle + screenX, yShift + middle - screenY, Color.Blue);
+			if (InDiapason(XShift + Middle + screenX, 0, WindowSize) &&
+				InDiapason(YShift + Middle - screenY, 0, WindowSize))
+				image.SetPixel(XShift + Middle + screenX, YShift + Middle - screenY, Color.Blue);
 
-			if (InDiapason(xShift + middle + screenX, 0, WindowSize) &&
-				InDiapason(yShift + WindowSize - middle + screenY, 0, WindowSize))
-				image.SetPixel(xShift + middle + screenX, yShift + WindowSize - middle + screenY, Color.Blue);
+			if (InDiapason(XShift + Middle + screenX, 0, WindowSize) &&
+				InDiapason(YShift + WindowSize - Middle + screenY, 0, WindowSize))
+				image.SetPixel(XShift + Middle + screenX, YShift + WindowSize - Middle + screenY, Color.Blue);
 
-			if (InDiapason(xShift + middle - screenX, 0, WindowSize) &&
-				InDiapason(yShift + middle - screenY, 0, WindowSize))
-				image.SetPixel(xShift + middle - screenX, yShift + middle - screenY, Color.Blue);
+			if (InDiapason(XShift + Middle - screenX, 0, WindowSize) &&
+				InDiapason(YShift + Middle - screenY, 0, WindowSize))
+				image.SetPixel(XShift + Middle - screenX, YShift + Middle - screenY, Color.Blue);
 
-			if (InDiapason(xShift + middle - screenX, 0, WindowSize) &&
-				InDiapason(yShift + WindowSize - middle + screenY, 0, WindowSize))
-				image.SetPixel(xShift + middle - screenX, yShift + WindowSize - middle + screenY, Color.Blue);
+			if (InDiapason(XShift + Middle - screenX, 0, WindowSize) &&
+				InDiapason(YShift + WindowSize - Middle + screenY, 0, WindowSize))
+				image.SetPixel(XShift + Middle - screenX, YShift + WindowSize - Middle + screenY, Color.Blue);
 		}
 
 		private static void DrawPixel(Bitmap image, int screenX, int screenY)
 		{
-			image.SetPixel(middle + screenX, middle - screenY, Color.Blue);
-			image.SetPixel(middle + screenX, WindowSize - middle + screenY, Color.Blue);
-			image.SetPixel(middle - screenX, middle - screenY, Color.Blue);
-			image.SetPixel(middle - screenX, WindowSize - middle + screenY, Color.Blue);
+			image.SetPixel(Middle + screenX, Middle - screenY, Color.Blue);
+			image.SetPixel(Middle + screenX, WindowSize - Middle + screenY, Color.Blue);
+			image.SetPixel(Middle - screenX, Middle - screenY, Color.Blue);
+			image.SetPixel(Middle - screenX, WindowSize - Middle + screenY, Color.Blue);
 		}
 
 		private static void DrawPixel1(Bitmap image, int screenX, int screenY)
@@ -71,13 +70,12 @@ namespace FuncGraphic
 			//xShift = (graphicSizeX * xShift) / xCoef;
 			//yShift = (graphicSizeY * yShift) / yCoef;
 
-			screenY = yCoef;
-			DrawPixelSsshifted(image, 0, yCoef);
-			for (screenX = 0; screenX <= xCoef && screenY >= 0; )
+			screenY = YCoef;
+			DrawPixelSsshifted(image, 0, YCoef);
+			for (screenX = 0; screenX <= XCoef && screenY >= 0; )
 			{
 				double realX = screenX + 1;
-				double t = Math.Acos(realX / middle);
-				double realY = yCoef * Math.Sin(Math.Acos(realX / xCoef));
+				double realY = YCoef * Math.Sin(Math.Acos(realX / XCoef));
 				double radiusSqr = (realX * realX + realY * realY);
 				double delta = ((screenX + 1) * (screenX + 1) + (screenY - 1) * (screenY - 1)) - radiusSqr;
 				if (delta < 0)//point inside
@@ -124,8 +122,8 @@ namespace FuncGraphic
 		static void Main(string[] args)
 		{
 			Bitmap image = new Bitmap(WindowSize + 1, WindowSize + 1);
-			g = Graphics.FromImage(image);
-			g.FillRectangle(Brushes.Azure, 0, 0, image.Width, image.Height);
+			Graphic = Graphics.FromImage(image);
+			Graphic.FillRectangle(Brushes.Azure, 0, 0, image.Width, image.Height);
 
 			CreateImage(image);
 
@@ -134,7 +132,5 @@ namespace FuncGraphic
 			ShowImageInWindow(image);
 
 		}
-
-		public static int rightBorder { get; set; }
 	}
 }
