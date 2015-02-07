@@ -51,60 +51,33 @@ namespace Ellipse
 			image.SetPixel(screenX, screenY, Color.Blue);
 		}
 
+		public static double SumDistToFocuses(int x, int y, double focus)
+		{
+			return Math.Sqrt(Math.Abs(y*y + (x - focus)*(x - focus))) + 
+				   Math.Sqrt(Math.Abs(y*y + (x + focus)*(x + focus)));
+		}
+
 		private static void CreateImage(Bitmap image)
 		{
 			int screenX, screenY;
-			//int graphicSizeX = 0;
-			//int graphicSizeY = 0;
-
-			//if (xCoef > yCoef)
-			//{
-			//    graphicSizeX = middle;
-			//    graphicSizeY = ((yCoef * graphicSizeX) / xCoef);
-			//}
-			//else
-			//{
-			//    graphicSizeY = middle;
-			//    graphicSizeX = (xCoef * graphicSizeY) / yCoef;
-			//}
-			//xShift = (graphicSizeX * xShift) / xCoef;
-			//yShift = (graphicSizeY * yShift) / yCoef;
-
+			double focus = Math.Sqrt(Math.Abs(XCoef*XCoef - YCoef*YCoef));
 			screenY = YCoef;
-			DrawPixelSsshifted(image, 0, YCoef);
-			for (screenX = 0; screenX <= XCoef && screenY >= 0; )
+			screenX = 0;
+			double etalonSum = Math.Sqrt(YCoef*YCoef + focus*focus)*2;
+			
+			//DrawPixelSsshifted(image, 0, YCoef);
+			for (screenX = 0; screenX <= XCoef && screenY > 0; )
 			{
-				double realX = screenX + 1;
-				double realY = YCoef * Math.Sin(Math.Acos(realX / XCoef));
-				double radiusSqr = (realX * realX + realY * realY);
-				double delta = ((screenX + 1) * (screenX + 1) + (screenY - 1) * (screenY - 1)) - radiusSqr;
-				if (delta < 0)//point inside
+				var currentsum = SumDistToFocuses(screenX + 1, screenY - 1, focus);
+				if (currentsum > etalonSum)//point inside
 				{
-					if (2 * delta + 2 * screenY - 1 > 0)
-					{
-						//screenY--;
-						screenX++;
-						DrawPixelSsshifted(image, screenX, screenY);
-					}
-					else
-					{
-						screenX++;
-						DrawPixelSsshifted(image, screenX, screenY);
-					}
+					screenX++;
+					DrawPixel1(image, screenX, screenY);
 				}
 				else//outside
 				{
-					if (2 * delta - 2 * screenX - 1 < 0)
-					{
-						//screenX++;
-						screenY--;
-						DrawPixelSsshifted(image, screenX, screenY);
-					}
-					else
-					{
-						screenY--;
-						DrawPixelSsshifted(image, screenX, screenY);
-					}
+					screenY--;
+					DrawPixel1(image, screenX, screenY);
 				}
 			}
 		}
