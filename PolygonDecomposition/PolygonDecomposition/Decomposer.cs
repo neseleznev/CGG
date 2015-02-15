@@ -19,6 +19,7 @@ namespace PolygonDecomposition
 				if (node.NextNode.NextNode.Point.Y < -1e-3)// всё плохо и невыпукло
 				{
 					var firstNodeInPartitionableSegment = polygon.Polygon
+						.Skip(1)
 						.Where(SegmentCrossOX)
 						.Where(someNode => someNode.Point.X > PolygonGeometry.Epsilon || someNode.NextNode.Point.X > PolygonGeometry.Epsilon)
 						.Where(someNode => IntersectionOfOX(someNode) > 0)
