@@ -64,7 +64,12 @@ namespace PolygonDecomposition
 
 		static public bool SegmentCrossOX(Node node)
 		{
-			return node.Point.Y <= 0 && node.NextNode.Point.Y >= 0;
+			return !SegmentLocatedOnOX(node) && node.Point.Y <= 0 && node.NextNode.Point.Y >= 0;
+		}
+
+		static public bool SegmentLocatedOnOX(Node node)
+		{
+			return Math.Abs(node.Point.Y) < 1e-10 && Math.Abs(node.NextNode.Point.Y) < 1e-10;
 		}
 
 		static public double IntersectionOfOX(Node node)

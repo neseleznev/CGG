@@ -10,8 +10,9 @@ namespace Visualization
 	{
 		public static List<Point2D> Nodes = new List<Point2D>
 		{
-			new Point2D(0, 0),
-			new Point2D(4, 0),
+			new Point2D(0, -1),
+			new Point2D(2, 1),
+			new Point2D(4, -1),
 			new Point2D(4, 4),
 			new Point2D(2, 2),
 			new Point2D(0, 4)
