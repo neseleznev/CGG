@@ -8,7 +8,7 @@ namespace PolygonDecomposition
 	{
 		public static void MovePolygon(Node polygon, Point2D point)
 		{
-			foreach (var node in polygon.Polygon)
+			foreach (var node in polygon.Polygon.ToList())
 			{
 				node.Point += point;
 			}

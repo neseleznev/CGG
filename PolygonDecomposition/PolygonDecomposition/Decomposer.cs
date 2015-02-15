@@ -1,21 +1,81 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PolygonDecomposition
 {
 	static public class Decomposer
 	{
-		//static IEnumerable<Node> DecomposePolygon(Node polygon)
-		//{
-		//	foreach (var node in polygon.Polygon)
-		//	{
-		//		PolygonGeometry.MovePolygon(polygon, new Point2D(-node.Point.X, -node.Point.Y));
+		static public IEnumerable<Node> DecomposePolygon(Node polygon)
+		{
+			foreach (var node in polygon.Polygon)
+			{
+				var originalNodePoint = node.Point;
+				PolygonGeometry.MovePolygon(node, new Point2D(-originalNodePoint.X, -originalNodePoint.Y));
 
-		//		var cosA = node.NextNode.Point.X/node.NextNode.Point.GetDistanceTo(node.Point);
-		//		var sinA = node.NextNode.Point.Y / node.NextNode.Point.GetDistanceTo(node.Point);
+				var angle = PolygonGeometry.VectorAngle(node);
+				PolygonGeometry.RotatePolygon(polygon, -angle);
 
-		//		var angle = sinA > 0 ? Angle.FromRad(Math.Acos(cosA)) : -Angle.FromRad(Math.Acos(cosA));
-		//	}
-		//}
+				if (node.NextNode.NextNode.Point.Y < -1e-3)// всё плохо и невыпукло
+				{
+					var firstNodeInPartitionableSegment = polygon.Polygon
+						.Where(SegmentCrossOX)
+						.Where(someNode => someNode.Point.X > 0 || someNode.NextNode.Point.X > 0)
+						.OrderBy(IntersectionOfOX)
+						.First();
+
+					var newPolygons = Separate(node, firstNodeInPartitionableSegment);
+					PolygonGeometry.RotatePolygon(newPolygons.Item1, angle);
+					PolygonGeometry.RotatePolygon(newPolygons.Item2, angle);
+
+					PolygonGeometry.MovePolygon(newPolygons.Item1, originalNodePoint);
+					PolygonGeometry.MovePolygon(newPolygons.Item2, originalNodePoint);
+
+					var partion = DecomposePolygon(newPolygons.Item1).ToList();
+					partion.AddRange(DecomposePolygon(newPolygons.Item2));
+
+					return partion;
+				}
+
+				PolygonGeometry.RotatePolygon(node, angle);
+				PolygonGeometry.MovePolygon(node, originalNodePoint);
+			}
+			return new[] {polygon};
+		}
+
+		static public Tuple<Node, Node> Separate(Node separatingSegment, Node separatedSegment)
+		{
+			var a = separatingSegment.NextNode;
+			var b = new Node(new Point2D(IntersectionOfOX(separatedSegment), 0));
+
+			var aButtomCopy = new Node(a.Point);
+			var bButtomCopy = new Node(b.Point);
+
+			aButtomCopy.NextNode = a.NextNode;
+
+			bButtomCopy.NextNode = aButtomCopy;
+			a.NextNode = b;
+
+			b.NextNode = separatedSegment.NextNode;
+			separatedSegment.NextNode = bButtomCopy;
+
+			return Tuple.Create(a, aButtomCopy);
+		}
+
+		static public bool SegmentCrossOX(Node node)
+		{
+			return node.Point.Y <= 0 && node.NextNode.Point.Y >= 0;
+		}
+
+		static public double IntersectionOfOX(Node node)
+		{
+			if (!SegmentCrossOX(node))
+				throw new Exception("segment does no cross OX");
+
+			return node.Point.X - 
+				((node.NextNode.Point.X - node.Point.X) / (node.NextNode.Point.Y - node.Point.Y)) *
+				node.Point.Y;
+
+		}
 	}
 }
