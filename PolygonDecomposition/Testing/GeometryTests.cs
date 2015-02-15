@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PolygonDecomposition;
 
@@ -76,6 +77,33 @@ namespace Testing
 			var actual = triangle.Polygon.ToList();
 
 			CollectionAssert.AreEqual(expected, actual);
+		}
+
+		[TestMethod]
+		public void AngleTest()
+		{
+			var point1 = new Point2D(1, 1);
+			var point2 = new Point2D(3, 1);
+			var point3 = new Point2D(3, 0);
+
+			var triangle = PolygonGeometry.CreatePolygon(new[] { point1, point2, point3 });
+
+			var node1 = triangle;
+			var node2 = node1.NextNode;
+			var node3 = node2.NextNode;
+
+			var expected1 = Angle.FromGrad(0);
+			var actual1 = PolygonGeometry.VectorAngle(node1);
+
+			var expected2 = Angle.FromGrad(-90);
+			var actual2 = PolygonGeometry.VectorAngle(node2);
+
+			var expected3 = Angle.FromRad(Math.PI - Math.Atan(0.5));
+			var actual3 = PolygonGeometry.VectorAngle(node3);
+
+			Assert.AreEqual(expected1, actual1);
+			Assert.AreEqual(expected2, actual2);
+			Assert.AreEqual(expected3, actual3);
 		}
 	}
 }

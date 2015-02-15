@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PolygonDecomposition
@@ -39,6 +40,16 @@ namespace PolygonDecomposition
 			currentNode.NextNode = firstNode;
 
 			return firstNode;
+		}
+
+		public static Angle VectorAngle(Node node)
+		{
+			var cosA = (node.NextNode.Point.X - node.Point.X) / node.NextNode.Point.GetDistanceTo(node.Point);
+			var sinA = (node.NextNode.Point.Y - node.Point.Y) / node.NextNode.Point.GetDistanceTo(node.Point);
+
+			var angle = sinA > 0 ? Angle.FromRad(Math.Acos(cosA)) : -Angle.FromRad(Math.Acos(cosA));
+
+			return angle;
 		}
 	}
 }

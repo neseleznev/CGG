@@ -50,5 +50,22 @@ namespace PolygonDecomposition
 		{
 			get { return Math.Sin(Radian); }
 		}
+
+		public static Angle operator -(Angle v)
+		{
+			return new Angle(-v.Grad);
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (obj is Angle)
+				return Equals((Angle)obj);
+			return false;
+		}
+
+		public bool Equals(Angle another)
+		{
+			return Math.Abs(Grad - another.Grad) < 0.000001;
+		}
 	}
 }
