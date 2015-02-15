@@ -23,6 +23,7 @@ namespace Visualization
 			ILArray<ILArray<float>> data = DataProvider.GetData();
 
 			ILPlotCube plotCube = new ILPlotCube();
+			var random = new Random();
 			foreach (var polygon in data)
 			{
 				plotCube.Add(new ILLinePlot(polygon, tag: "mylineplot")
@@ -30,9 +31,9 @@ namespace Visualization
 					Line =
 					{
 						Width = 2,
-						Color = Color.Red,
+						Color = Color.FromArgb(random.Next(0, 255), random.Next(0,255), random.Next(0,255)),
 						Antialiasing = true,
-						DashStyle = DashStyle.Dotted
+						DashStyle = DashStyle.Solid
 					}
 				});
 			}
