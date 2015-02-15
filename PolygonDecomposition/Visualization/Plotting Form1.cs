@@ -20,19 +20,23 @@ namespace Visualization
 		{
 
 			// create some test data, using our private computation module as inner class
-			ILArray<float> Pos = Computation.CreateData(4, 300);
+			ILArray<ILArray<float>> data = DataProvider.GetData();
 
-			// setup the plot (modify as needed)
-			ilPanel1.Scene.Add(new ILPlotCube(twoDMode: false) {
-                new ILLinePlot(Pos, tag: "mylineplot") {
-                    Line = { 
-                        Width = 2, 
-                        Color = Color.Red, 
-                        Antialiasing = true, 
-                        DashStyle = DashStyle.Dotted 
-                    }
-                }
-            });
+			ILPlotCube plotCube = new ILPlotCube();
+			foreach (var polygon in data)
+			{
+				plotCube.Add(new ILLinePlot(polygon, tag: "mylineplot")
+				{
+					Line =
+					{
+						Width = 2,
+						Color = Color.Red,
+						Antialiasing = true,
+						DashStyle = DashStyle.Dotted
+					}
+				});
+			}
+			ilPanel1.Scene.Add(plotCube);
 			// register event handler for allowing updates on right mouse click:
 			ilPanel1.Scene.First<ILLinePlot>().MouseClick += (_s, _a) =>
 			{
