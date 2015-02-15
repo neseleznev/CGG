@@ -51,5 +51,15 @@ namespace PolygonDecomposition
 
 			return angle;
 		}
+
+		public static bool IsNearZero(double n)
+		{
+			return Math.Abs(n) < Epsilon;
+		}
+
+		public static double Epsilon
+		{
+			get { return 1e-10; }
+		}
 	}
 }

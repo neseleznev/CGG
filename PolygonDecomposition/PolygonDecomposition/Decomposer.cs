@@ -20,7 +20,8 @@ namespace PolygonDecomposition
 				{
 					var firstNodeInPartitionableSegment = polygon.Polygon
 						.Where(SegmentCrossOX)
-						.Where(someNode => someNode.Point.X > 0 || someNode.NextNode.Point.X > 0)
+						.Where(someNode => someNode.Point.X > PolygonGeometry.Epsilon || someNode.NextNode.Point.X > PolygonGeometry.Epsilon)
+						.Where(someNode => IntersectionOfOX(someNode) > 0)
 						.OrderBy(IntersectionOfOX)
 						.First();
 
@@ -64,7 +65,9 @@ namespace PolygonDecomposition
 
 		static public bool SegmentCrossOX(Node node)
 		{
-			return !SegmentLocatedOnOX(node) && node.Point.Y <= 0 && node.NextNode.Point.Y >= 0;
+			return !SegmentLocatedOnOX(node) && 
+				   node.Point.Y <= PolygonGeometry.Epsilon && 
+				   node.NextNode.Point.Y >= -PolygonGeometry.Epsilon;
 		}
 
 		static public bool SegmentLocatedOnOX(Node node)
