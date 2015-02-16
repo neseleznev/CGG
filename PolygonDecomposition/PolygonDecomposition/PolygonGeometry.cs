@@ -16,7 +16,7 @@ namespace PolygonDecomposition
 
 		public static void RotatePolygon(Node polygon, Angle angle)
 		{
-			foreach (var node in polygon.Polygon)
+			foreach (var node in polygon.Polygon.ToList())
 			{
 				node.Point = new Point2D(
 					angle.Cos * node.Point.X - angle.Sin * node.Point.Y,

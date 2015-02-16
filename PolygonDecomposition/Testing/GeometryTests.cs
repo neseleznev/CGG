@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PolygonDecomposition;
@@ -104,6 +105,34 @@ namespace Testing
 			Assert.AreEqual(expected1, actual1);
 			Assert.AreEqual(expected2, actual2);
 			Assert.AreEqual(expected3, actual3);
+		}
+
+		[TestMethod]
+		public void RemoveRepeatingPointsTest()
+		{
+			var nodes = new List<Point2D>
+			{
+				new Point2D(1, 0),
+				new Point2D(2, 0),
+				new Point2D(1, 0),
+				new Point2D(3, 1)
+			};
+
+			var firstNode = PolygonGeometry.CreatePolygon(nodes);
+
+			var expectedNodes = new List<Point2D>
+			{
+				new Point2D(1, 0),
+				new Point2D(2, 0),
+				new Point2D(3, 1)
+			};
+			var expectedPolygon = PolygonGeometry.CreatePolygon(expectedNodes);
+			var expected = Decomposer.RemoveRepeatingPoints(expectedPolygon).Polygon.ToList();
+
+			var actual = Decomposer.RemoveRepeatingPoints(firstNode).Polygon.ToList();
+
+			CollectionAssert.AreEqual(expected, actual);
+
 		}
 	}
 }

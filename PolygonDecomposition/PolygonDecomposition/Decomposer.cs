@@ -8,6 +8,13 @@ namespace PolygonDecomposition
 	{
 		static public IEnumerable<Node> DecomposePolygon(Node polygon)
 		{
+			if (OrientedArea(polygon) < 0)
+				polygon = RevertPolygon(polygon);
+			return DecomposePolygonInternal(polygon);
+		}
+
+		static public IEnumerable<Node> DecomposePolygonInternal(Node polygon)
+		{
 			foreach (var node in polygon.Polygon)
 			{
 				var originalNodePoint = node.Point;
@@ -61,12 +68,14 @@ namespace PolygonDecomposition
 			b.NextNode = separatedSegment.NextNode;
 			separatedSegment.NextNode = bButtomCopy;
 
+			a = RemoveRepeatingPoints(a);
+			aButtomCopy = RemoveRepeatingPoints(aButtomCopy);
 			return Tuple.Create(a, aButtomCopy);
 		}
 
 		static public bool SegmentCrossOX(Node node)
 		{
-			return !SegmentLocatedOnOX(node) && 
+			return //!SegmentLocatedOnOX(node) && 
 				   node.Point.Y <= PolygonGeometry.Epsilon && 
 				   node.NextNode.Point.Y >= -PolygonGeometry.Epsilon;
 		}
@@ -85,6 +94,29 @@ namespace PolygonDecomposition
 				((node.NextNode.Point.X - node.Point.X) / (node.NextNode.Point.Y - node.Point.Y)) *
 				node.Point.Y;
 
+		}
+
+		static public Node RevertPolygon(Node firstNode)
+		{
+			var pointList = firstNode.Polygon.Reverse().Select(node => node.Point);
+			return PolygonGeometry.CreatePolygon(pointList);
+		}
+
+		static public double OrientedArea(Node firstNode)
+		{
+			var area = 0.0;
+			foreach (var node in firstNode.Polygon)
+			{
+				area += node.Point.X*node.NextNode.Point.Y - node.Point.Y*node.NextNode.Point.X;
+			}
+			return area/2;
+		}
+
+		public static Node RemoveRepeatingPoints(Node firstNode)
+		{
+			var points = firstNode.Polygon.Select(node => node.Point).ToList();
+			var distPoints = points.Distinct().ToList();
+			return PolygonGeometry.CreatePolygon(distPoints);
 		}
 	}
 }

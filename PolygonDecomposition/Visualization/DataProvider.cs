@@ -8,21 +8,34 @@ namespace Visualization
 {
 	public static class DataProvider
 	{
+		public static List<Point2D> Obelus = new List<Point2D>
+		{
+			
+			new Point2D(1, 0),
+			new Point2D(1, 1),
+			new Point2D(0, 1),
+			new Point2D(0, 2),
+			new Point2D(1, 2),
+			new Point2D(1, 3),
+			new Point2D(2, 3),
+			new Point2D(2, 2),
+			new Point2D(3, 2),
+			new Point2D(3, 1),
+			new Point2D(2, 1),
+			new Point2D(2, 0)
+		};
+
 		public static List<Point2D> Nodes = new List<Point2D>
 		{
 			
-			new Point2D(2, 1),
-			new Point2D(1, 1),
+			new Point2D(2, 2),
 			new Point2D(1, 2),
-			new Point2D(0, 2),
+			new Point2D(1, 4),
+			new Point2D(0, 4),
 			new Point2D(0, 0),
-			new Point2D(5, 0),
-			new Point2D(5, 2),
-			new Point2D(4, 2),
-			new Point2D(4, 1),
-			new Point2D(3, 1),
-			new Point2D(3, 2),
-			new Point2D(2, 2)
+			new Point2D(2, 0),
+			new Point2D(6, 4),
+			new Point2D(3, 4)
 		};
 
 		public static ILArray<ILArray<float>> GetData()

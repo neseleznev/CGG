@@ -80,8 +80,8 @@ namespace PolygonDecomposition
 			int hashCode = 0;
 			unchecked
 			{
-				hashCode += 1000000007 * X.GetHashCode();
-				hashCode += 1000000009 * Y.GetHashCode();
+				hashCode += 1000000007*(int) Math.Round(X, 3);
+				hashCode += 1000000009*(int) Math.Round(Y, 3);
 			}
 			return hashCode;
 		}
