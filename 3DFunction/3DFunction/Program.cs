@@ -1,5 +1,7 @@
 ﻿
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -8,7 +10,7 @@ namespace _3DFunction
 	class Program
 	{
 		const int WindowSize = 500;
-		const double Accuracy = 0.05;
+		const double Accuracy = 0.3;
 		private static CoordConverter Converter = new CoordConverter(250, 250);
 		private static double ZoomCoef = 100;
 
@@ -30,7 +32,7 @@ namespace _3DFunction
 			{
 				var z = Constants.Function(x, Constants.YFrom);
 				var lastPoint = Converter.ToPlaneCoord(x * ZoomCoef, Constants.YFrom * ZoomCoef, z * ZoomCoef);
-				foreach (var y in Range(Constants.YFrom, Constants.YTo, Accuracy))
+				foreach (var y in Range(Constants.YFrom, Constants.YTo, Accuracy/100))
 				{
 					z = Constants.Function(x, y);
 					var zoomedX = x * ZoomCoef;
@@ -39,6 +41,9 @@ namespace _3DFunction
 					var planePoint = Converter.ToPlaneCoord(zoomedX, zoomedY, zoomedZ);
 
 					if(planePoint.X < 0 || planePoint.X >= WindowSize)
+						continue;
+
+					if(lastPoint.X == planePoint.X)
 						continue;
 
 					if (planePoint.Y >= topHorizon[planePoint.X])
