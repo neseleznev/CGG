@@ -1,7 +1,4 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -10,14 +7,16 @@ namespace _3DFunction
 	class Program
 	{
 		const int WindowSize = 500;
-		const double Accuracy = 0.3;
+		const double Accuracy = 0.1;
 		private static CoordConverter Converter = new CoordConverter(250, 250);
-		private static double ZoomCoef = 100;
+		private static double ZoomCoef = 50;
 
+		private static Bitmap Image;
 		private static Graphics g;
-		private static Pen pen = new Pen(Color.Black);
+		private static Pen penTop = new Pen(Color.DeepPink);
+		private static Pen penBottom = new Pen(Color.Blue);
 
-		static private void CreateImage(Bitmap image)
+		static private void CreateImage1()
 		{
 			var topHorizon = new int[WindowSize];
 			var bottomHorizon = new int[WindowSize];
@@ -32,7 +31,54 @@ namespace _3DFunction
 			{
 				var z = Constants.Function(x, Constants.YFrom);
 				var lastPoint = Converter.ToPlaneCoord(x * ZoomCoef, Constants.YFrom * ZoomCoef, z * ZoomCoef);
-				foreach (var y in Range(Constants.YFrom, Constants.YTo, Accuracy/100))
+				foreach (var y in Range(Constants.YFrom, Constants.YTo, Accuracy / 100))
+				{
+					z = Constants.Function(x, y);
+					var zoomedX = x * ZoomCoef;
+					var zoomedY = y * ZoomCoef;
+					var zoomedZ = z * ZoomCoef;
+					var planePoint = Converter.ToPlaneCoord(zoomedX, zoomedY, zoomedZ);
+
+					if (planePoint.X < 0 || planePoint.X >= WindowSize)
+						continue;
+
+					if (lastPoint.X == planePoint.X)
+						continue;
+
+					if (planePoint.Y >= topHorizon[planePoint.X])
+					{
+						topHorizon[planePoint.X] = planePoint.Y;
+						//DrawPixel(image, planePoint.X, planePoint.Y);
+						g.DrawLine(penTop, lastPoint.X, lastPoint.Y, planePoint.X, planePoint.Y);
+					}
+
+					if (planePoint.Y <= bottomHorizon[planePoint.X])
+					{
+						bottomHorizon[planePoint.X] = planePoint.Y;
+						//DrawPixel(image, planePoint.X, planePoint.Y);
+						g.DrawLine(penBottom, lastPoint.X, lastPoint.Y, planePoint.X, planePoint.Y);
+					}
+					lastPoint = planePoint;
+				}
+			}
+		}
+
+		static private void CreateImage2()
+		{
+			var topHorizon = new int[WindowSize];
+			var bottomHorizon = new int[WindowSize];
+
+			for (var i = 0; i < WindowSize; i++)
+			{
+				topHorizon[i] = int.MinValue;
+				bottomHorizon[i] = int.MaxValue;
+			}
+
+			foreach (var y in Range(Constants.YTo, Constants.YFrom, Accuracy))
+			{
+				var z = Constants.Function(Constants.XFrom, y);
+				var lastPoint = Converter.ToPlaneCoord(Constants.XFrom * ZoomCoef, y * ZoomCoef, z * ZoomCoef);
+				foreach (var x in Range(Constants.XFrom, Constants.XTo, Accuracy/100))
 				{
 					z = Constants.Function(x, y);
 					var zoomedX = x * ZoomCoef;
@@ -50,14 +96,14 @@ namespace _3DFunction
 					{
 						topHorizon[planePoint.X] = planePoint.Y;
 						//DrawPixel(image, planePoint.X, planePoint.Y);
-						g.DrawLine(pen, lastPoint.X, lastPoint.Y, planePoint.X, planePoint.Y);
+						g.DrawLine(penTop, lastPoint.X, lastPoint.Y, planePoint.X, planePoint.Y);
 					}
 
 					if (planePoint.Y <= bottomHorizon[planePoint.X])
 					{
 						bottomHorizon[planePoint.X] = planePoint.Y;
 						//DrawPixel(image, planePoint.X, planePoint.Y);
-						g.DrawLine(pen, lastPoint.X, lastPoint.Y, planePoint.X, planePoint.Y);
+						g.DrawLine(penBottom, lastPoint.X, lastPoint.Y, planePoint.X, planePoint.Y);
 					}
 					lastPoint = planePoint;
 				}
@@ -102,15 +148,16 @@ namespace _3DFunction
 
 		static void Main(string[] args)
 		{
-			Bitmap image = new Bitmap(WindowSize + 1, WindowSize + 1);
-			g = Graphics.FromImage(image);
-			g.FillRectangle(Brushes.Azure, 0, 0, image.Width, image.Height);
+			Image = new Bitmap(WindowSize + 1, WindowSize + 1);
+			g = Graphics.FromImage(Image);
+			g.FillRectangle(Brushes.Azure, 0, 0, Image.Width, Image.Height);
 
-			CreateImage(image);
+			CreateImage1();
+			CreateImage2();
 
 			// image.Save("img.png", ImageFormat.Png);
 
-			ShowImageInWindow(image);
+			ShowImageInWindow(Image);
 
 		}
 	}

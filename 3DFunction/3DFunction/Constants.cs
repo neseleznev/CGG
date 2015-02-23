@@ -4,11 +4,11 @@ namespace _3DFunction
 {
 	static public class Constants
 	{
-		public static double XFrom = -5;
-		public static double XTo = 5;
+		public static double XFrom = -3;
+		public static double XTo = 3;
 
-		public static double YFrom = -5;
-		public static double YTo = 5;
+		public static double YFrom = -3;
+		public static double YTo = 3;
 
 		public static double Function(double x, double y)
 		{
