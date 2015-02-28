@@ -11,7 +11,7 @@ namespace Ellipse
 		private const int XShift = 0;
 		private const int YShift = 0;
 		private static int XCoef = 250;
-		private static int YCoef = 2;
+		private static int YCoef = 4;
 		private const int Middle = WindowSize/2;
 
 		private static bool InDiapason(int val, int min, int max)
@@ -21,6 +21,8 @@ namespace Ellipse
 
 		private static void DrawPixelSsshifted(Bitmap image, int screenX, int screenY)
 		{
+		    screenY = Math.Max(0, screenY-1);
+		    //screenX = Math.Min(XCoef, screenX);
 			if (InDiapason(XShift + Middle + screenX, 0, WindowSize) &&
 				InDiapason(YShift + Middle - screenY, 0, WindowSize))
 				image.SetPixel(XShift + Middle + screenX, YShift + Middle - screenY, Color.Blue);
@@ -82,17 +84,21 @@ namespace Ellipse
                 etalonSum = SumDistToFocuses(XCoef, 0, focus);
 		    }
 			DrawPixelSsshifted(image, 0, YCoef);
-			for (screenX = 0; screenX <= XCoef && screenY >= 0; )
+			for (screenX = 0; screenX < XCoef && screenY > 0; )
 			{
 				var currentsum = SumDistToFocuses(screenX + 1, screenY - 1, focus);
 				if (currentsum < etalonSum)//point inside
 				{
 					screenX++;
+                    if(screenX >= XCoef)
+                        break;
                     DrawPixelSsshifted(image, screenX, screenY);
 				}
 				else//outside
 				{
 					screenY--;
+                    if(screenY <= 0)
+                        break;
                     DrawPixelSsshifted(image, screenX, screenY);
 				}
 			}
