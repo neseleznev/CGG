@@ -10,8 +10,8 @@ namespace Ellipse
 		private static Graphics Graphic;
 		private const int XShift = 0;
 		private const int YShift = 0;
-		private const int XCoef = 200;
-		private const int YCoef = 100;
+		private static int XCoef = 250;
+		private static int YCoef = 2;
 		private const int Middle = WindowSize/2;
 
 		private static bool InDiapason(int val, int min, int max)
@@ -53,8 +53,17 @@ namespace Ellipse
 
 		public static double SumDistToFocuses(int x, int y, double focus)
 		{
-			return Math.Sqrt(Math.Abs(y*y + (x - focus)*(x - focus))) + 
-				   Math.Sqrt(Math.Abs(y*y + (x + focus)*(x + focus)));
+		    if (XCoef > YCoef)
+		    {
+		        return Math.Sqrt(Math.Abs(y*y + (x - focus)*(x - focus))) +
+		               Math.Sqrt(Math.Abs(y*y + (x + focus)*(x + focus)));
+		    }
+		    else
+		    {
+		        return Math.Sqrt(Math.Abs(x*x + (y - focus)*(y - focus))) +
+		               Math.Sqrt(Math.Abs(x*x + (y + focus)*(y + focus)));
+		    }
+			
 		}
 
 		private static void CreateImage(Bitmap image)
@@ -63,21 +72,28 @@ namespace Ellipse
 			double focus = Math.Sqrt(Math.Abs(XCoef*XCoef - YCoef*YCoef));
 			screenY = YCoef;
 			screenX = 0;
-			double etalonSum = Math.Sqrt(YCoef*YCoef + focus*focus)*2;
-			
-			//DrawPixelSsshifted(image, 0, YCoef);
-			for (screenX = 0; screenX <= XCoef && screenY > 0; )
+		    double etalonSum;
+		    if (YCoef > XCoef)
+		    {
+                etalonSum = SumDistToFocuses(0, YCoef, focus);
+		    }
+		    else
+		    {
+                etalonSum = SumDistToFocuses(XCoef, 0, focus);
+		    }
+			DrawPixelSsshifted(image, 0, YCoef);
+			for (screenX = 0; screenX <= XCoef && screenY >= 0; )
 			{
 				var currentsum = SumDistToFocuses(screenX + 1, screenY - 1, focus);
-				if (currentsum > etalonSum)//point inside
+				if (currentsum < etalonSum)//point inside
 				{
 					screenX++;
-					DrawPixel1(image, screenX, screenY);
+                    DrawPixelSsshifted(image, screenX, screenY);
 				}
 				else//outside
 				{
 					screenY--;
-					DrawPixel1(image, screenX, screenY);
+                    DrawPixelSsshifted(image, screenX, screenY);
 				}
 			}
 		}
