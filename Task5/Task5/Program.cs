@@ -102,6 +102,10 @@ namespace Task5
 
 		private static double GetDistance(Point3D point3D)
 		{
+			if (point3D.X > Constants.DistToZero)
+			{
+				return int.MaxValue;
+			}
 			return Constants.DistToZero - point3D.X;
 		}
 
