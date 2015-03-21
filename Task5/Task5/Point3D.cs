@@ -99,12 +99,11 @@ namespace Task5
 		public double GetDistanceTo(Point3D otherPoint)
 		{
 			return GetDistance(this, otherPoint);
-			//return Math.Sqrt((X-otherPoint.X)*(X-otherPoint.X)+(Y-otherPoint.Y)*(Y-otherPoint.Y));
 		}
 
 		public override string ToString()
 		{
-			return String.Format("(X={0:0.000};Y={1:0.000};Z={1:0.000)", X, Y, Z);
+			return String.Format("(X={0:0.000};Y={1:0.000};Z={2:0.000}", X, Y, Z);
 		}
 	}
 }

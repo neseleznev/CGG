@@ -19,18 +19,17 @@ namespace Task5
 		private static void CreateImage()
 		{
 			
-			for (var screenY = 0; screenY < Constants.WindowSize; screenY++)
+			for (var screenY = 1; screenY < Constants.WindowSize; screenY++)
 			{
-				var currentZ = -screenY + Constants.WindowSize;
-				ProcessLine(currentZ);
+				ProcessLine(screenY);
 			}
 		}
 
-		private static void ProcessLine(int currentZ)
+		private static void ProcessLine(int currentY)
 		{
 			var zBuf = new double[Constants.WindowSize];
 			var colors = new Color[Constants.WindowSize];
-			for (int i = 0; i < Constants.WindowSize; i++)
+			for (var i = 0; i < Constants.WindowSize; i++)
 			{
 				zBuf[i] = int.MaxValue;
 				colors[i] = Color.Azure;
@@ -38,7 +37,7 @@ namespace Task5
 
 			foreach (var figure in Figures)
 			{
-				ProcessFigureInLine(currentZ, figure, zBuf, colors);
+				ProcessFigureInLine(currentY, figure, zBuf, colors);
 			}
 		}
 
