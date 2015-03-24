@@ -4,122 +4,218 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace FuncGraphic
 {
-	class Program
-	{
-		const int WindowSize = 500;
-		const int XFrom = -1;
-		const int XTo = 4;
-		private static Pen pen = new Pen(Color.Blue, 1);
-		private static Pen axisPen = new Pen(Color.Black, 2);
-		private static Graphics g;
+    class Program
+    {
+        private const double Eps = 1e-9;
+        private delegate double FuncToShow(double x);
 
-		private delegate double FuncToShow(double x);
+        private static double SafeValue(FuncToShow f, double x)
+        {
+            try
+            {
+                return f(x);
+            }
+            catch (OverflowException)
+            {
+                return double.NaN;
+            }
+        }
 
-		private static FuncToShow myF = x => x*Math.Cos(x*x);
+        static readonly Pen DefaultPen = new Pen(Color.DarkRed, 1);
+        static readonly Pen DefaultAxisPen = new Pen(Color.DarkBlue, 3);
+        static readonly Point DefaultWindowSize = new Point(600, 600);
 
-		private static double Cos1DivX(double x)
+        // Вычислим минимальное и максимальное значения функции на заданном интервале [xFrom; xTo]
+		private static Tuple<double, double> GetMinMaxValues(FuncToShow f, double xFrom, double xTo, int windowWidth)
 		{
-			return Math.Cos(1 / x);
-		}
-
-		private static double XCube(double x)
-		{
-			return x * x * x;
-		}
-
-		private static double XIn5(double x)
-		{
-			return x * x * x * x * x;
-		}
-
-		private static Tuple<double, double> GetMinMaxValues(FuncToShow F, double xFrom, double xTo)
-		{
-			double maxY = F(XFrom);
-			double minY = F(XFrom);
-			int screenX;
-			double x, y;
-			for (screenX = 0; screenX < WindowSize; ++screenX)
+			double maxY = double.MinValue,
+                   minY = double.MaxValue;
+		    double x, y;
+		    for (int screenX = 0; screenX < windowWidth; ++screenX)
 			{
-				x = (XFrom + screenX * (xTo - XFrom) / WindowSize);
-				y = F(x);
-				if (y < minY)
-					minY = y;
-				if (y > maxY)
-					maxY = y;
+				x = xFrom + screenX * (xTo - xFrom) / windowWidth;
+			    y = SafeValue(f, x);
+			    if (double.IsNaN(y) || double.IsInfinity(y))
+			        continue;
+				minY = Math.Min(y, minY);
+				maxY = Math.Max(y, maxY);
 			}
 			return Tuple.Create(minY, maxY);
 		}
 
-		private static void DrowAxis(double minX, double maxX, double minY, double maxY)
-		{
-			if (minX < 0 && maxX > 0)
-			{
-				int screenX0 = (int)(-minX * WindowSize / (maxX - minX));
-				g.DrawLine(axisPen, screenX0, WindowSize, screenX0, 0);
-			}
+        // Нарисуем необходимые оси в соответствии с диапазоном значений функции
+        private static void DrawAxis(Graphics g, Pen axisPen, Point windowSize,
+                                     double minX, double maxX, double minY, double maxY)
+        {
+            int? screenX = null, screenY = null;
+            
+            // Необходимость оси ординат
+            if (Math.Abs(maxX) < Eps && Math.Abs(minX) < Eps)
+                screenX = windowSize.Y / 2;
+			if (minX < 0 && maxX > 0 && Math.Abs(maxX - minX) > Eps)
+                screenX = (int)(-minX * windowSize.X / (maxX - minX));
+            // Необходимость оси абсцисс
+            if (Math.Abs(maxY) < Eps && Math.Abs(maxY) < Eps)
+                screenY = windowSize.X/2;
+            if (minY < 0 && maxY > 0)
+		        screenY = (int)(maxY*windowSize.Y/(maxY - minY));
 
-			if (minY < 0 && maxY > 0)
-			{
-				int screenY0 = (int)(maxY * WindowSize / (maxY - minY));
-				g.DrawLine(axisPen, 0, screenY0, WindowSize, screenY0);
-			}
+            if (screenX != null)
+                g.DrawLine(axisPen, screenX.Value, windowSize.Y, screenX.Value, 0);
+            if (screenY != null)
+                g.DrawLine(axisPen, 0, screenY.Value, windowSize.X, screenY.Value);
 		}
 
-		private static void CreateImage(Bitmap image, FuncToShow F, double xFrom, double xTo)
+
+        // Нарисовать f на [xFrom; xTo] (с ручками и размером окна по умолчанию)
+        private static void DrawFunction(FuncToShow f, double xFrom, double xTo)
+        {
+            DrawFunction(f, xFrom, xTo, DefaultPen, DefaultAxisPen, DefaultWindowSize);
+        }
+
+        // Нарисовать f на [xFrom; xTo] ручкой pen, оси координат ручкой axisPen (размером окна по умолчанию)
+        private static void DrawFunction(FuncToShow f, double xFrom, double xTo, Pen pen, Pen axisPen)
+        {
+            DrawFunction(f, xFrom, xTo, pen, axisPen, DefaultWindowSize);
+        }
+
+        // Нарисовать f на [xFrom; xTo] в окне размером windowSize (с ручками по умолчанию) 
+        private static void DrawFunction(FuncToShow f, double xFrom, double xTo, Point windowSize)
+        {
+            DrawFunction(f, xFrom, xTo, DefaultPen, DefaultAxisPen, windowSize);
+        }
+
+        // Нарисовать f на [xFrom; xTo] ручкой pen, оси координат ручкой axisPen, размером окна windowSize
+		private static void DrawFunction(FuncToShow f, double xFrom, double xTo, Pen pen, Pen axisPen, Point windowSize)
 		{
+		    if (windowSize.X*windowSize.Y == 0 || xFrom > xTo)
+		        throw new ArgumentException(
+                    "Неверные параметры! xFrom не должно быть больше xTo," +
+                    "измерения windowSize не должны быть нулевыми.");
 
-			Tuple<double, double> minMax = GetMinMaxValues(F, XFrom, XTo);
-			double minY = minMax.Item1;
-			double maxY = minMax.Item2;
+            var image = new Bitmap(windowSize.X, windowSize.Y);
+            Graphics g = Graphics.FromImage(image);
+            g.FillRectangle(Brushes.BlanchedAlmond, 0, 0, windowSize.X, windowSize.Y);
 
-			DrowAxis(XFrom, XTo, minY, maxY);
+            Tuple<double, double> minMax = GetMinMaxValues(f, xFrom, xTo, windowSize.Y);
+            double minY = minMax.Item1,
+                   maxY = minMax.Item2;
 
-			Point nextPoint, oldPoint;
-			int screenX, screenY;
-			double x, y;
+            DrawAxis(g, axisPen, windowSize, xFrom, xTo, minY, maxY);
 
-			screenY = (int)((maxY - F(XFrom)) * WindowSize / (maxY - minY));
-			oldPoint = new Point(0, screenY);
+            // Если нужно нарисовать 1 точку по x
+		    if (Math.Abs(xFrom - xTo) < Eps)
+		    {
+                // Если значение в ней определено
+		        var y = SafeValue(f, xFrom);
+		        if (!double.IsNaN(y) && !double.IsInfinity(y)) {
+		            var point = new Point(windowSize.X/2, windowSize.Y/2);
+                    g.DrawLine(pen, point, point);
+		        }
+                ShowImageInWindow(image);
+		        return;
+		    }
 
-			for (screenX = 0; screenX < WindowSize; screenX++)
-			{
-				x = (XFrom + screenX * (xTo - XFrom) / WindowSize);
-				y = F(x);
-				if (double.IsNaN(y))
-					continue;
-				screenY = (int)((maxY - y) * WindowSize / (maxY - minY));
-				nextPoint = new Point(screenX, screenY);
-				g.DrawLine(pen, oldPoint, nextPoint);
-				//image.SetPixel(nextPoint.X, nextPoint.Y, Color.Blue);
-				oldPoint = nextPoint;
-			}
+            // Определим первую точку по x, которую необходимо отобразить
+		    int screenX = 0, screenY;
+		    Point? oldPoint = null, nextPoint = null;
+		    bool maxYEqualsMinY = Math.Abs(maxY - minY) < Eps;
+
+		    for (; screenX < windowSize.X; ++screenX)
+		    {
+                double x = xFrom + screenX * (xTo - xFrom) / windowSize.X,
+                       y = SafeValue(f, x);
+		        if (double.IsNaN(y) || double.IsInfinity(y))
+		            continue;
+                // Если функция вида y = C (minY=maxY), рисуем на середине экрана; иначе обычный перевод в экранные
+                screenY = maxYEqualsMinY ? windowSize.Y/2
+                                         : (int)((maxY - y) * windowSize.Y / (maxY - minY));
+                oldPoint = new Point(screenX, screenY);
+		        break;
+		    }
+
+            // Нашли первую определенную точку
+		    if (oldPoint != null)
+		    {
+		        for (; screenX < windowSize.X; ++screenX)
+		        {
+		            double x = xFrom + screenX * (xTo - xFrom) / windowSize.X,
+                           y = SafeValue(f, x);
+                    if (double.IsNaN(y) || double.IsInfinity(y))
+                    {
+                        // Новая точка не определена, нужно нарисовать точку в текущем положении
+                        if (oldPoint != null)
+                            g.DrawLine(pen, oldPoint.Value, oldPoint.Value);
+		                oldPoint = null;
+                        continue;
+		            }
+                    screenY = maxYEqualsMinY ? windowSize.Y/2
+                                             : (int)((maxY - y) * windowSize.Y / (maxY - minY));
+		            nextPoint = new Point(screenX, screenY);
+
+                    // Если есть откуда рисовать, проводим прямую до новой точки 
+		            if (oldPoint != null)
+		                g.DrawLine(pen, oldPoint.Value, nextPoint.Value);
+		            oldPoint = nextPoint;
+		        }
+		    }
+		    //image.Save("img.png", ImageFormat.Png);
+            ShowImageInWindow(image);
 		}
 
-		private static void ShowImageInWindow(Bitmap image)
+        // Отрисовка самого простого окна
+		private static void ShowImageInWindow(Image image)
 		{
-			var form = new Form
-			{
-				ClientSize = new Size(WindowSize, WindowSize)
-			};
-			form.Controls.Add(new PictureBox { Image = image, Dock = DockStyle.Fill, SizeMode = PictureBoxSizeMode.CenterImage });
+			var form = new Form { ClientSize = new Size(image.Width, image.Height) };
+			form.Controls.Add(new PictureBox {
+                Image = image,
+                Dock = DockStyle.Fill,
+                SizeMode = PictureBoxSizeMode.CenterImage });
 			form.ShowDialog();
 		}
 
+        // Тестовые функции
+        private static double TestFunction1(double x)
+        {
+            if (Math.Abs(x - ((int)(x * 10) + Eps) / 10) < Eps)
+                return 0;
+            return x;
+        }
+        private static double TestFunction2(double x)
+        {
+            if (Math.Abs(x) > 1)
+                return Math.Cos(x * x);
+            return 0;
+        }
+        private static double TestFunction3(double x)
+        {
+            if (Math.Abs(x - (int)x) < 0.1)
+                return x;// Math.Sin(x);
+            return double.NaN;
+        }
+        private static readonly FuncToShow[] Functions =
+        {
+            TestFunction3,
+            x => 1/x,
+            x => 1,
+            x => 0,
+            TestFunction1,
+            TestFunction2,
+            x => (1/x)*Math.Sin(1/x),
+            x => x*Math.Cos(x*x),
+            x => Math.Cos(1/x),
+            x => Math.Sqrt(x),
+            x => x*x*x,
+            x => x*x*x*x*x,
+        };
+
 		static void Main(string[] args)
-		{
-			Bitmap image = new Bitmap(WindowSize + 1, WindowSize + 1);
-			g = Graphics.FromImage(image);
-			g.FillRectangle(Brushes.Azure, 0, 0, image.Width, image.Height);
-
-			CreateImage(image, myF, XFrom, XTo);
-
-			// image.Save("img.png", ImageFormat.Png);
-
-			ShowImageInWindow(image);
-
-		}
+        {
+		    foreach (var function in Functions) DrawFunction(function, -30, 30);
+        }
 	}
 }
