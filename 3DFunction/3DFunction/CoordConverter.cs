@@ -20,12 +20,12 @@ namespace _3DFunction
 
 		private int PlaneX(double x, double y, double z)
 		{
-			return (int) (-x/(2*Math.Sqrt(2)) + y);
+			return (int) (-x / (2*Math.Sqrt(2)) + y);
 		}
 
 		private int PlaneY(double x, double y, double z)
 		{
-			return (int) (x/(2*Math.Sqrt(2)) - z);
+			return (int) (x / (2*Math.Sqrt(2)) - z);
 		}
 	}
 }
