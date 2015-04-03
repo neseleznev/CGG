@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Security.Cryptography;
 
 namespace FuncGraphic
 {
@@ -12,6 +13,9 @@ namespace FuncGraphic
     {
         private const double Eps = 1e-9;
         private delegate double FuncToShow(double x);
+        static readonly Pen DefaultPen = new Pen(Color.DarkRed, 1);
+        static readonly Pen DefaultAxisPen = new Pen(Color.DarkBlue, 3);
+        static readonly Point DefaultWindowSize = new Point(600, 600);
 
         private static double SafeValue(FuncToShow f, double x)
         {
@@ -25,9 +29,6 @@ namespace FuncGraphic
             }
         }
 
-        static readonly Pen DefaultPen = new Pen(Color.DarkRed, 1);
-        static readonly Pen DefaultAxisPen = new Pen(Color.DarkBlue, 3);
-        static readonly Point DefaultWindowSize = new Point(600, 600);
 
         // Вычислим минимальное и максимальное значения функции на заданном интервале [xFrom; xTo]
 		private static Tuple<double, double> GetMinMaxValues(FuncToShow f, double xFrom, double xTo, int windowWidth)
@@ -69,6 +70,19 @@ namespace FuncGraphic
             if (screenY != null)
                 g.DrawLine(axisPen, 0, screenY.Value, windowSize.X, screenY.Value);
 		}
+
+        // Отрисовка самого простого окна
+        private static void ShowImageInWindow(Image image)
+        {
+            var form = new Form { ClientSize = new Size(image.Width, image.Height) };
+            form.Controls.Add(new PictureBox
+            {
+                Image = image,
+                Dock = DockStyle.Fill,
+                SizeMode = PictureBoxSizeMode.CenterImage
+            });
+            form.ShowDialog();
+        }
 
 
         // Нарисовать f на [xFrom; xTo] (с ручками и размером окна по умолчанию)
@@ -167,44 +181,12 @@ namespace FuncGraphic
             ShowImageInWindow(image);
 		}
 
-        // Отрисовка самого простого окна
-		private static void ShowImageInWindow(Image image)
-		{
-			var form = new Form { ClientSize = new Size(image.Width, image.Height) };
-			form.Controls.Add(new PictureBox {
-                Image = image,
-                Dock = DockStyle.Fill,
-                SizeMode = PictureBoxSizeMode.CenterImage });
-			form.ShowDialog();
-		}
 
-        // Тестовые функции
-        private static double TestFunction1(double x)
-        {
-            if (Math.Abs(x - ((int)(x * 10) + Eps) / 10) < Eps)
-                return 0;
-            return x;
-        }
-        private static double TestFunction2(double x)
-        {
-            if (Math.Abs(x) > 1)
-                return Math.Cos(x * x);
-            return 0;
-        }
-        private static double TestFunction3(double x)
-        {
-            if (Math.Abs(x - (int)x) < 0.1)
-                return x;// Math.Sin(x);
-            return double.NaN;
-        }
         private static readonly FuncToShow[] Functions =
         {
-            TestFunction3,
             x => 1/x,
             x => 1,
             x => 0,
-            TestFunction1,
-            TestFunction2,
             x => (1/x)*Math.Sin(1/x),
             x => x*Math.Cos(x*x),
             x => Math.Cos(1/x),
@@ -215,7 +197,8 @@ namespace FuncGraphic
 
 		static void Main(string[] args)
         {
-		    foreach (var function in Functions) DrawFunction(function, -30, 30);
+		    foreach (var function in Functions)
+                DrawFunction(function, -1, 10);
         }
 	}
 }
