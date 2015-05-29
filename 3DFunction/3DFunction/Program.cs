@@ -6,10 +6,10 @@ namespace _3DFunction
 {
 	class Program
 	{
-		const int DefaultWindowSize = 500;
-		const double Accuracy = 0.1;
-		private static readonly CoordConverter Converter = new CoordConverter(250, 250);
-		private static readonly double ZoomCoef = 50;
+		const int DefaultWindowSize = 700;
+		const double Accuracy = 0.03;
+		private static readonly CoordConverter Converter = new CoordConverter(350, 350);
+		private static readonly double ZoomCoef = 90;
 
 		private static Bitmap Image;
 		private static Graphics g;

@@ -12,7 +12,7 @@ namespace _3DFunction
 
 		public static double Function(double x, double y)
 		{
-			return CosXY(x, y);
+		    return Math.Sin(x*x + y*y);//(CosXY(x, y)));
 		}
 
 		private static double CosXY(double x, double y)
